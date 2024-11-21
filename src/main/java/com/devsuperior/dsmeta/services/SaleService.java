@@ -31,4 +31,10 @@ public class SaleService {
 		return result.stream().map(x -> new SaleMinDTO(x)).collect(Collectors.toList());
 
 	}
+
+	public List<SaleMinDTO> getSummary(LocalDate minDate, LocalDate maxDate, String name) {
+		List<SaleMinProjection> result = repository.getReport(minDate, maxDate, name);
+		return result.stream().map(x -> new SaleMinDTO(x)).collect(Collectors.toList());
+
+	}
 }

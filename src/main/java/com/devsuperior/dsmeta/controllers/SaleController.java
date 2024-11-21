@@ -35,8 +35,11 @@ public class SaleController {
 	}
 
 	@GetMapping(value = "/summary")
-	public ResponseEntity<?> getSummary() {
-		// TODO
-		return null;
+	public ResponseEntity<?> getSummary(
+			@RequestParam(value = "minDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate minDate,
+			@RequestParam(value = "maxDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate maxDate,
+			@RequestParam(value = "name", required = false)String name) {
+		List<SaleMinDTO> dto = service.getReport(minDate, maxDate, name);
+		return ResponseEntity.ok(dto);
 	}
 }
