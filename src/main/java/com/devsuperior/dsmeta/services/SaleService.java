@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 
 import com.devsuperior.dsmeta.projection.SaleProjection;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.devsuperior.dsmeta.dto.SaleMinDTO;
@@ -27,20 +29,31 @@ public class SaleService {
 		return new SaleMinDTO(entity);
 	}
 
-	public List<SaleMinDTO> getReport(String minDate, String maxDate, String name) {
+	public Page<SaleMinDTO> getReport(String minDate, String maxDate, String name, Pageable pageable) {
 
-		LocalDate dateMax = (maxDate == null) ? LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault())
-				: LocalDate.parse(maxDate);
+		LocalDate dateMax;
 
-		LocalDate dateMin = (minDate == null) ? dateMax.minusYears(1L) : LocalDate.parse(minDate);
+		LocalDate dateMin;
 
-		if (name == null || name.isEmpty()) {
-			List<SaleProjection> result =repository.getReport(dateMin, dateMax, "");
-			return result.stream().map(x -> new SaleMinDTO(x)).collect(Collectors.toList());
+		if (maxDate == null) {
+			dateMax = LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
+		} else {
+			dateMax = LocalDate.parse(maxDate);
 		}
 
-		List<SaleProjection> result = repository.getReport(dateMin, dateMax, name);
-		return result.stream().map(x -> new SaleMinDTO(x)).collect(Collectors.toList());
+		if (minDate == null) {
+			dateMin = dateMax.minusYears(1L);
+		} else {
+			dateMin = LocalDate.parse(minDate);
+		}
+
+		if (name == null || name.isEmpty()) {
+			Page<SaleProjection> result = repository.getReport(dateMin, dateMax, "", pageable);
+			return result.map(x -> new SaleMinDTO(x));
+		}
+
+		Page<SaleProjection> result = repository.getReport(dateMin, dateMax, name,pageable);
+		return result.map(x -> new SaleMinDTO(x));
 
 	}
 }

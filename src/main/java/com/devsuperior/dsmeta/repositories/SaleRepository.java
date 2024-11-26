@@ -1,6 +1,8 @@
 package com.devsuperior.dsmeta.repositories;
 
 import com.devsuperior.dsmeta.projection.SaleProjection;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.devsuperior.dsmeta.entities.Sale;
@@ -19,9 +21,16 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
                     "on tb_sales.seller_id = tb_seller.id " +
                     "where (:name IS NULL OR UPPER(tb_seller.name) like CONCAT('%', UPPER(:name), '%')) " +
                     "and (:minDate IS NULL OR tb_sales.date >= :minDate) " +
-                    "and (:maxDate IS NULL OR tb_sales.date <= :maxDate) " +
-                    "order by tb_sales.id desc")
-    List<SaleProjection> getReport(@Param("minDate") LocalDate minDate, @Param("maxDate") LocalDate maxDate, @Param("name") String name);
+                    "and (:maxDate IS NULL OR tb_sales.date <= :maxDate) ",
+                    countQuery = "select count (*)" +
+                            "from tb_sales " +
+                            "inner join tb_seller " +
+                            "on tb_sales.seller_id = tb_seller.id " +
+                            "where (:name IS NULL OR UPPER(tb_seller.name) like CONCAT('%', UPPER(:name), '%')) " +
+                            "and (:minDate IS NULL OR tb_sales.date >= :minDate) " +
+                            "and (:maxDate IS NULL OR tb_sales.date <= :maxDate) "
+                    )
+    Page<SaleProjection> getReport(@Param("minDate") LocalDate minDate, @Param("maxDate") LocalDate maxDate, @Param("name") String name, Pageable pageable);
 
 
 }
