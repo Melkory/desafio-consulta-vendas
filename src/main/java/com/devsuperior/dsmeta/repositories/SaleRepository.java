@@ -1,5 +1,6 @@
 package com.devsuperior.dsmeta.repositories;
 
+import com.devsuperior.dsmeta.dto.SellerMinDTO;
 import com.devsuperior.dsmeta.projection.SaleProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,18 +20,21 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
                     "from tb_sales " +
                     "inner join tb_seller " +
                     "on tb_sales.seller_id = tb_seller.id " +
-                    "where (:name IS NULL OR UPPER(tb_seller.name) like CONCAT('%', UPPER(:name), '%')) " +
-                    "and (:minDate IS NULL OR tb_sales.date >= :minDate) " +
-                    "and (:maxDate IS NULL OR tb_sales.date <= :maxDate) ",
+                    "where UPPER(tb_seller.name) like CONCAT('%', UPPER(:name), '%') " +
+                    "and tb_sales.date between :minDate and :maxDate ",
                     countQuery = "select count (*)" +
                             "from tb_sales " +
                             "inner join tb_seller " +
                             "on tb_sales.seller_id = tb_seller.id " +
-                            "where (:name IS NULL OR UPPER(tb_seller.name) like CONCAT('%', UPPER(:name), '%')) " +
-                            "and (:minDate IS NULL OR tb_sales.date >= :minDate) " +
-                            "and (:maxDate IS NULL OR tb_sales.date <= :maxDate) "
+                            "where UPPER(tb_seller.name) like CONCAT('%', UPPER(:name), '%') " +
+                            "and tb_sales.date between :minDate and :maxDate "
                     )
     Page<SaleProjection> getReport(@Param("minDate") LocalDate minDate, @Param("maxDate") LocalDate maxDate, @Param("name") String name, Pageable pageable);
 
+    @Query("select new com.devsuperior.dsmeta.dto.SellerMinDTO (obj.name, sum(s.amount)) " +
+            "from Seller obj join obj.sales s " +
+            "where s.date between :minDate and :maxDate " +
+            "group by obj.name ")
+    List<SellerMinDTO> getSummary(@Param("minDate") LocalDate minDate, @Param("maxDate") LocalDate maxDate);
 
 }

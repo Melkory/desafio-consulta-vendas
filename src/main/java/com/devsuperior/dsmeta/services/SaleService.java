@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.devsuperior.dsmeta.dto.SellerMinDTO;
 import com.devsuperior.dsmeta.projection.SaleProjection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -55,5 +56,26 @@ public class SaleService {
 		Page<SaleProjection> result = repository.getReport(dateMin, dateMax, name,pageable);
 		return result.map(x -> new SaleMinDTO(x));
 
+	}
+
+	public List<SellerMinDTO> getSummary(String minDate, String maxDate) {
+
+		LocalDate dateMax;
+
+		LocalDate dateMin;
+
+		if (maxDate == null) {
+			dateMax = LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
+		} else {
+			dateMax = LocalDate.parse(maxDate);
+		}
+
+		if (minDate == null) {
+			dateMin = dateMax.minusYears(1L);
+		} else {
+			dateMin = LocalDate.parse(minDate);
+		}
+
+		return repository.getSummary(dateMin, dateMax);
 	}
 }
